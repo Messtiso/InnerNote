@@ -1,4 +1,4 @@
-# InnerNote
+# InnerNote - Transparent Mood Insights from Everyday Journaling
 
 InnerNote is a web-based journaling application designed to provide transparent mood insights from everyday writing.
 
