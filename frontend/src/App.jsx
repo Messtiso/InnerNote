@@ -21,8 +21,10 @@ function App() {
 
   return (
     <main>
-      <h1>InnerNote</h1>
-      <p>Transparent Mood Insights from Everyday Journaling</p>
+      <header>
+        <h1>InnerNote</h1>
+        <p>Transparent Mood Insights from Everyday Journaling</p>
+      </header>
 
       <section>
         <h2>Write a journal entry</h2>
@@ -35,7 +37,9 @@ function App() {
         />
 
         <br />
-
+        <p className="character-count">
+          {journalText.length} character
+        </p>
         <button onClick={handleSaveEntry}>
           Save Entry
         </button>
@@ -48,8 +52,8 @@ function App() {
           <p>No entries yet.</p>
         ) : (
           entries.map((entry) => (
-            <article key={entry.id}>
-              <p>{entry.date}</p>
+            <article className="entry-card" key={entry.id}>
+              <p className="entry-date">{entry.date}</p>
               <p>{entry.text}</p>
             </article>
           ))
