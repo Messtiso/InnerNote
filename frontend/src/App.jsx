@@ -4,15 +4,29 @@ function App() {
   const [journalText, setJournalText] = useState('');
   const [entries, setEntries] = useState([]);
 
-  const handleSaveEntry = () => {
+  const handleSaveEntry = async () => {
     if (journalText.trim() === '') {
       return;
     }
 
+    const response = await fetch('http://localhost:5000/api/analyse', {
+      method: 'POST',
+      headers:{
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        journalText: journalText
+        })
+      });
+    
+    const analysis = await response.json();
+
     const newEntry = {
       id: Date.now(),
       text: journalText,
-      date: new Date().toLocaleDateString()
+      date: new Date().toLocaleDateString(),
+      mood: analysis.mood,
+      score: analysis.score
     };
 
     setEntries([newEntry, ...entries]);
@@ -55,6 +69,8 @@ function App() {
             <article className="entry-card" key={entry.id}>
               <p className="entry-date">{entry.date}</p>
               <p>{entry.text}</p>
+              <p>Mood: {entry.mood}</p>
+              <p>Score: {entry.score}</p>
             </article>
           ))
         )}
