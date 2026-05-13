@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const express = require('express');
 const cors = require('cors');
 const Sentiment = require('sentiment');
+const JournalEntry = require('./models/JournalEntry');
 
 const app = express();
 
@@ -32,7 +33,7 @@ app.get('/api/test', (req, res) => {
     });
 });
 
-app.post('/api/analyse', (req, res) => {
+app.post('/api/analyse', async (req, res) => {
     const { journalText } = req.body;
 
     const result = sentiment.analyze(journalText);
@@ -45,11 +46,19 @@ app.post('/api/analyse', (req, res) => {
         mood = 'negative';
     }
 
+    const savedEntry = await JournalEntry.create({
+        text: journalText,
+        mood: mood,
+        score: result.score,
+        keywords: result.words
+    });
+
     res.json({
-    mood: mood,
-    score: result.score,
-    comparative: result.comparative,
-    keywords: result.words
+        id: savedEntry._id,
+        mood: savedEntry.mood,
+        score: savedEntry.score,
+        keywords: savedEntry.keywords,
+        createdAt: savedEntry.createdAt
     });
 });
 
