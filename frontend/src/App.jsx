@@ -26,7 +26,8 @@ function App() {
       text: journalText,
       date: new Date().toLocaleDateString(),
       mood: analysis.mood,
-      score: analysis.score
+      score: analysis.score,
+      keywords: analysis.keywords
     };
 
     setEntries([newEntry, ...entries]);
@@ -68,9 +69,23 @@ function App() {
           entries.map((entry) => (
             <article className="entry-card" key={entry.id}>
               <p className="entry-date">{entry.date}</p>
+
               <p>{entry.text}</p>
-              <p>Mood: {entry.mood}</p>
-              <p>Score: {entry.score}</p>
+
+              <p>
+                <strong>Mood:</strong> {entry.mood}
+              </p>
+
+              <p>
+                <strong>Score:</strong> {entry.score}
+              </p>
+
+              <p>
+                <strong>Keywords:</strong>{' '}
+                {entry.keywords.length > 0
+                  ? entry.keywords.join(', ')
+                  : 'None detected'}
+              </p>
             </article>
           ))
         )}

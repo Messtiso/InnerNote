@@ -1,9 +1,12 @@
 const express = require('express');
 const cors = require('cors');
+const Sentiment = require('sentiment');
 
 const app = express();
 
 const PORT = 5000;
+
+const sentiment = new Sentiment();
 
 app.use(cors());
 app.use(express.json());
@@ -21,10 +24,21 @@ app.get('/api/test', (req, res) => {
 app.post('/api/analyse', (req, res) => {
     const { journalText } = req.body;
 
+    const result = sentiment.analyze(journalText);
+
+    let mood = 'neutral';
+
+    if(result.score > 0) {
+        mood = 'positive';
+    } else if(result.score < 0) {
+        mood = 'negative';
+    }
+
     res.json({
-    mood: 'neutral',
-    score: 0,
-    message: `Recieved journal entry: ${journalText}`
+    mood: mood,
+    score: result.score,
+    comparative: result.comparative,
+    keywords: result.words
     });
 });
 
