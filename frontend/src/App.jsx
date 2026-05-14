@@ -13,7 +13,6 @@ function App() {
   const fetchEntries = async () => {
     try {
       const response = await fetch('http://localhost:5000/api/entries');
-
       const data = await response.json();
 
       setEntries(data);
@@ -23,20 +22,20 @@ function App() {
   };
 
   const handleDeleteEntry = async (entryId) => {
-  try {
-    const response = await fetch(`http://localhost:5000/api/entries/${entryId}`, {
-      method: 'DELETE'
-    });
+    try {
+      const response = await fetch(`http://localhost:5000/api/entries/${entryId}`, {
+        method: 'DELETE'
+      });
 
-    if (!response.ok) {
-      throw new Error('Could not delete entry');
+      if (!response.ok) {
+        throw new Error('Could not delete entry');
+      }
+
+      setEntries(entries.filter((entry) => entry._id !== entryId));
+    } catch (error) {
+      setErrorMessage('Could not delete entry. Please try again.');
     }
-
-    setEntries(entries.filter((entry) => entry._id !== entryId));
-  } catch (error) {
-    setErrorMessage('Could not delete entry. Please try again.');
-  }
-};
+  };
 
   const handleSaveEntry = async () => {
     if (journalText.trim() === '') {
@@ -50,7 +49,7 @@ function App() {
     try {
       const response = await fetch('http://localhost:5000/api/analyse', {
         method: 'POST',
-        headers:{
+        headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -58,16 +57,16 @@ function App() {
         })
       });
 
-      if(!response.ok) {
+      if (!response.ok) {
         throw new Error('Something went wrong while analysing your entry.');
       }
-    
+
       const analysis = await response.json();
 
       const newEntry = {
         id: Date.now(),
         text: journalText,
-        date: new Date().toLocaleDateString(),
+        date: new Date().toLocaleString(),
         mood: analysis.mood,
         score: analysis.score,
         keywords: analysis.keywords
@@ -82,6 +81,17 @@ function App() {
     }
   };
 
+  const totalEntries = entries.length;
+
+  const positiveEntries = entries.filter((entry) => entry.mood === 'positive').length;
+  const neutralEntries = entries.filter((entry) => entry.mood === 'neutral').length;
+  const negativeEntries = entries.filter((entry) => entry.mood === 'negative').length;
+
+  const averageMoodScore =
+    totalEntries > 0
+      ? (entries.reduce((total, entry) => total + entry.score, 0) / totalEntries).toFixed(1)
+      : 0;
+
   return (
     <main>
       <header>
@@ -93,13 +103,14 @@ function App() {
         <h2>Write a journal entry</h2>
 
         <textarea
-        value={journalText}
-        onChange={(event) => setJournalText(event.target.value)}
-        placeholder="Write about your day..."
-        rows="8"
+          value={journalText}
+          onChange={(event) => setJournalText(event.target.value)}
+          placeholder="Write about your day..."
+          rows="8"
         />
 
         <br />
+
         <p className="character-count">
           {journalText.length} characters
         </p>
@@ -109,9 +120,45 @@ function App() {
             {errorMessage}
           </p>
         )}
+
         <button onClick={handleSaveEntry} disabled={isLoading}>
           {isLoading ? 'Analysing mood...' : 'Save Entry'}
         </button>
+      </section>
+
+      <section>
+        <h2>Mood Summary</h2>
+
+        {totalEntries === 0 ? (
+          <p>No mood data available yet.</p>
+        ) : (
+          <div className="summary-grid">
+            <div className="summary-card">
+              <h3>Total Entries</h3>
+              <p>{totalEntries}</p>
+            </div>
+
+            <div className="summary-card">
+              <h3>Average Mood Score</h3>
+              <p>{averageMoodScore}</p>
+            </div>
+
+            <div className="summary-card">
+              <h3>Positive</h3>
+              <p>{positiveEntries}</p>
+            </div>
+
+            <div className="summary-card">
+              <h3>Neutral</h3>
+              <p>{neutralEntries}</p>
+            </div>
+
+            <div className="summary-card">
+              <h3>Negative</h3>
+              <p>{negativeEntries}</p>
+            </div>
+          </div>
+        )}
       </section>
 
       <section>
@@ -122,52 +169,55 @@ function App() {
         ) : (
           entries.map((entry) => (
             <article
-             className={`entry-card mood-${entry.mood}`}
-             key={entry._id || entry.id}
-          >
-            <p className="entry-date">
-              {new Date(entry.createdAt || entry.date).toLocaleString}
-            </p>
+              className={`entry-card mood-${entry.mood}`}
+              key={entry._id || entry.id}
+            >
+              <p className="entry-date">
+                {entry.createdAt || entry.date
+                  ? new Date(entry.createdAt || entry.date).toLocaleString()
+                  : 'Recently added'}
+              </p>
 
-            <div className={`mood-badge badge-${entry.mood}`}>
+              <div className={`mood-badge badge-${entry.mood}`}>
                 {entry.mood}
-            </div>
+              </div>
 
-            <p>{entry.text}</p>
+              <p>{entry.text}</p>
 
-            <div className="analysis-box">
-              <p className="analysis-title">
-                Transparent Mood Analysis
-              </p>
+              <div className="analysis-box">
+                <p className="analysis-title">
+                  Transparent Mood Analysis
+                </p>
 
-              <p>
-                Mood score: <strong>{entry.score}</strong>
-              </p>
+                <p>
+                  Mood score: <strong>{entry.score}</strong>
+                </p>
 
-              <p>
-                This result was generated using sentiment analysis based on emotionally weighted words detected in your journal entry.
-              </p>
-
-              <div>
-                <strong>Detected keywords:</strong>
+                <p>
+                  This result was generated using sentiment analysis based on emotionally weighted words detected in your journal entry.
+                </p>
 
                 <div>
-                  {entry.keywords && entry.keywords.length > 0 ? (
-                    entry.keywords.map((word, index) => (
-                      <span className="keyword" key={index}>
-                        {word}
-                      </span>
-                    ))
-                  ) : (
-                    <p>No significant keywords detected.</p>
-                  )}
+                  <strong>Detected keywords:</strong>
+
+                  <div>
+                    {entry.keywords && entry.keywords.length > 0 ? (
+                      entry.keywords.map((word, index) => (
+                        <span className="keyword" key={index}>
+                          {word}
+                        </span>
+                      ))
+                    ) : (
+                      <p>No significant keywords detected.</p>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-            <button onClick={() => handleDeleteEntry(entry._id)}>
-              Delete Entry
-            </button>
-          </article>
+
+              <button onClick={() => handleDeleteEntry(entry._id)}>
+                Delete Entry
+              </button>
+            </article>
           ))
         )}
       </section>
