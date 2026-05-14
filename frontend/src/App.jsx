@@ -22,6 +22,22 @@ function App() {
     }
   };
 
+  const handleDeleteEntry = async (entryId) => {
+  try {
+    const response = await fetch(`http://localhost:5000/api/entries/${entryId}`, {
+      method: 'DELETE'
+    });
+
+    if (!response.ok) {
+      throw new Error('Could not delete entry');
+    }
+
+    setEntries(entries.filter((entry) => entry._id !== entryId));
+  } catch (error) {
+    setErrorMessage('Could not delete entry. Please try again.');
+  }
+};
+
   const handleSaveEntry = async () => {
     if (journalText.trim() === '') {
       setErrorMessage('Please write something before saving.');
@@ -110,7 +126,7 @@ function App() {
              key={entry._id || entry.id}
           >
             <p className="entry-date">
-              {new Date(entry.createdAt || entry.date).toLocaleString()}
+              {new Date(entry.createdAt || entry.date).toLocaleString}
             </p>
 
             <div className={`mood-badge badge-${entry.mood}`}>
@@ -148,6 +164,9 @@ function App() {
                 </div>
               </div>
             </div>
+            <button onClick={() => handleDeleteEntry(entry._id)}>
+              Delete Entry
+            </button>
           </article>
           ))
         )}

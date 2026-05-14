@@ -74,6 +74,26 @@ app.get('/api/entries', async (req, res) => {
     }
 });
 
+app.delete('/api/entries/:id', async (req, res) => {
+  try {
+    const deletedEntry = await JournalEntry.findByIdAndDelete(req.params.id);
+
+    if (!deletedEntry) {
+      return res.status(404).json({
+        message: 'Entry not found'
+      });
+    }
+
+    res.json({
+      message: 'Entry deleted successfully'
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Could not delete journal entry'
+    });
+  }
+});
+
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
