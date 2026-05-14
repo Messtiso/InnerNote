@@ -1,10 +1,26 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function App() {
   const [journalText, setJournalText] = useState('');
   const [entries, setEntries] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    fetchEntries();
+  }, []);
+
+  const fetchEntries = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/entries');
+
+      const data = await response.json();
+
+      setEntries(data);
+    } catch (error) {
+      console.log('Error fetching entries:', error);
+    }
+  };
 
   const handleSaveEntry = async () => {
     if (journalText.trim() === '') {
@@ -91,9 +107,11 @@ function App() {
           entries.map((entry) => (
             <article
              className={`entry-card mood-${entry.mood}`}
-             key={entry.id}
+             key={entry._id || entry.id}
           >
-            <p className="entry-date">{entry.date}</p>
+            <p className="entry-date">
+              {new Date(entry.createdAt || entry.date).toLocaleString()}
+            </p>
 
             <div className={`mood-badge badge-${entry.mood}`}>
                 {entry.mood}

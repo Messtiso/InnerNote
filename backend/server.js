@@ -62,6 +62,18 @@ app.post('/api/analyse', async (req, res) => {
     });
 });
 
+app.get('/api/entries', async (req, res) => {
+    try {
+        const entries = await JournalEntry.find().sort({ createdAt: -1});
+
+        res.json(entries);
+    } catch (error) {
+        res.status(500).json({
+            message: 'Could not fetch journal entries'
+        });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
