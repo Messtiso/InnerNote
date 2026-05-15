@@ -64,9 +64,9 @@ function App() {
       const analysis = await response.json();
 
       const newEntry = {
-        id: Date.now(),
+        id: analysis.id,
         text: journalText,
-        date: new Date().toLocaleString(),
+        createdAt: analysis.createdAt,
         mood: analysis.mood,
         score: analysis.score,
         keywords: analysis.keywords
